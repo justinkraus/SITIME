@@ -16,18 +16,70 @@
 
 body {
 	background: white;
+	text-align: center;
 }
+
+.tick text{
+	text-align: center;
+	font-size: 110%;
+
+}
+
+path.line {
+        fill: none;
+        stroke: lightgrey;
+        stroke-width: 1px;
+      }
+
+/*:root {
+      --accent-color: #B8B8B8;
+    }*/
+
+.annotation path {
+      stroke: lightgrey;
+      fill: none;
+    }
+
+    .annotation path.connector-arrow, 
+    .title text, .annotation text,
+    .annotation.callout.circle .annotation-subject path{
+      fill: black;
+    }
+    .annotation-note-bg {
+      fill: rgba(255, 255, 255, 0);
+    }
+
+    .annotation-note-title {
+      font-weight: bold;
+    }
+
+    .annotation.xythreshold {
+      cursor: move;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    text.hover {
+      font-size: .7em;
+    }
+
+    text.title {
+      font-size: 1.1em;
+    }
 
 
 </style>
 
 <!-- Viridis color palette-->
 <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-annotation/2.5.1/d3-annotation.min.js"></script>
 
 <script>
 
 // set the dimensions and margins of the graph
-var margin = {top: 80, right: 30, bottom: 50, left:200},
+var margin = {top: 80, right: 30, bottom: 50, left:350},
     width = 1200 - margin.left - margin.right,
     height = 800 - margin.top - margin.bottom;
 
@@ -40,61 +92,59 @@ var svg = d3.select("#my_dataviz")
     .attr("transform",
           "translate(" + margin.left + "," + margin.top + ")");
 
+
 //read data
 d3.csv("test.csv", function(data) {
+musems = data;
 
-  // Get the different categories and count them
-// var categories = ["NMAH",
-// "NMAI",
-// "NPG",
-// "SIA",
-// "SIL",
-// "FSA",
-// "CHNDM",
-// "AAA",
-// "SAAM",
-// "NPM",
-// "FSG",
-// "FBR",
-// "HAC",
-// "NMAAHC",
-// "HMSG",
-// "HSFA",
-// "NAA",
-// "NASM",
-// "ACM",
-// "ACAH",
-// "NMAfA",
-// "CFCHFOLKLIFE"]
+// var categories =[
+// 'Cooper Hewitt, Smithsonian Design Museum', 
+// 'Freer Gallery of Art and Arthur M Sackler Gallery', 
+// 'Hirshhorn Museum and Sculpture Garden', 
+// 'National Museum of African Art', 
+// 'National Portrait Gallery', 
+// 'Smithsonian American Art Museum', 
+// 'Anacostia Community Museum', 
+// 'National Air and Space Museum', 
+// 'National Museum of African American History and Culture', 
+// 'National Museum of American History', 
+// 'National Museum of the American Indian', 
+// 'National Postal Museum', 
+// 'Archives of American Art', 
+// 'Archives of American History', 
+// 'Human Studies Film Archives', 
+// 'Ralph Rinzler Folklife Archives and Collections', 
+// 'Smithsonian Field Book Project', 
+// 'Freer Sackler Archives', 
+// 'National Anthropological Archives', 
+// 'Smithsonian Institution Archives', 
+// 'Smithsonian Libraries']
 
 var categories =[
-'Cooper Hewitt, Smithsonian Design Museum', 
-'Freer Gallery of Art and Arthur M Sackler Gallery', 
-'Hirshhorn Museum and Sculpture Garden', 
+'Smithsonian Libraries',
+'Archives of American Art',
+'Archives of American History', 
+'Ralph Rinzler Folklife Archives and Collections', 
 'Human Studies Film Archives', 
-'National Museum of African Art', 
-'National Portrait Gallery', 
-'Smithsonian American Art Museum', 
-'Anacostia Community Museum', 
+'Freer Sackler Archives', 
 'National Anthropological Archives', 
+'Anacostia Community Museum', 
 'National Air and Space Museum', 
 'National Museum of African American History and Culture', 
 'National Museum of American History', 
 'National Museum of the American Indian', 
-'National Postal Museum', 
-'Archives of American Art', 
-'Archives of American History', 
-'Ralph Rinzler Folklife Archives and Collections', 
-'Smithsonian Field Book Project', 
-'Freer Sackler Archives', 
-'Smithsonian Institution Archives', 
-'Smithsonian Libraries']
+'National Postal Museum',
+'Cooper Hewitt, Smithsonian Design Museum', 
+'Freer Gallery of Art and Arthur M Sackler Gallery', 
+'Hirshhorn Museum and Sculpture Garden', 
+'National Museum of African Art', 
+'National Portrait Gallery', 
+'Smithsonian American Art Museum']
 
 var artCats = [
 'Cooper Hewitt, Smithsonian Design Museum', 
 'Freer Gallery of Art and Arthur M Sackler Gallery', 
 'Hirshhorn Museum and Sculpture Garden', 
-'Human Studies Film Archives', 
 'National Museum of African Art', 
 'National Portrait Gallery', 
 'Smithsonian American Art Museum' 
@@ -102,7 +152,6 @@ var artCats = [
 
 var hcCats =[
 'Anacostia Community Museum', 
-'National Anthropological Archives', 
 'National Air and Space Museum', 
 'National Museum of African American History and Culture', 
 'National Museum of American History', 
@@ -113,9 +162,11 @@ var hcCats =[
 var alCats = [
 'Archives of American Art', 
 'Archives of American History', 
+'Human Studies Film Archives', 
 'Ralph Rinzler Folklife Archives and Collections', 
 'Smithsonian Field Book Project', 
 'Freer Sackler Archives', 
+'National Anthropological Archives', 
 'Smithsonian Institution Archives', 
 'Smithsonian Libraries'
 ]
@@ -188,7 +239,10 @@ var alCats = [
     .paddingInner(1)
   svg.append("g")
     .call(d3.axisLeft(yName).tickSize(0))
-    .select(".domain").call(wrap, 10).remove()
+    .select(".domain")
+    .remove();
+   
+   d3.selectAll(".tick text").call(wrap, 150);
 
   // Compute kernel density estimation for each column:
   var kde = kernelDensityEstimator(kernelEpanechnikov(7), x.ticks(40)) // increase this 40 for more accurate density.
@@ -205,21 +259,22 @@ var alCats = [
     .append("path")
       .attr("transform", function(d){return("translate(0," + (yName(d.key)-height) +")" )})
       .attr("fill", function(d){
+      	fixedVal = 1900
         grp = d.key ;
         if (artCats.indexOf(grp) > -1){
         index = categories.indexOf(grp)
         value = allMeans[index]
-        return artColor( value  )
+        return artColor( fixedVal  )
     	}
     	else if (hcCats.indexOf(grp) > -1){
         index = categories.indexOf(grp)
         value = allMeans[index]
-        return hcColor( value  )
+        return hcColor( fixedVal  )
     	}
     	else if (alCats.indexOf(grp) > -1){
         index = categories.indexOf(grp)
         value = allMeans[index]
-        return alColor( value  )
+        return alColor( fixedVal  )
     	}
       })
       .datum(function(d){return(d.density)})
@@ -251,27 +306,93 @@ var alCats = [
 		}
 
 		function drawTooltip() {
-		  const categories = Math.floor((x.invert(d3.mouse(tipBox.node())[0]) + 5) / 10) * 10;
+		  const year = Math.floor((x.invert(d3.mouse(tipBox.node())[0]) + 5) / 10) * 10;
 		  
+		  
+		  	// d3.sum(data.map(function(d){return d.categories[i]}))
 		    
 		  tooltipLine.attr('stroke', 'black')
-		    .attr('x1', x(categories))
-		    .attr('x2', x(categories))
+		    .attr('x1', x(year))
+		    .attr('x2', x(year))
 		    .attr('y1', 0)
 		    .attr('y2', height);
 		  
-		  tooltip.html(categories)
+		  tooltip.html(year)
 		    .style('display', 'block')
 		    .style('left', (d3.event.pageX + 20)+"px")
 		    .style('top', (d3.event.pageY - 20)+"px")
 		    .selectAll()
-		    .data(d).enter()
+		    .data(categories).enter()
 		    .append('div')
 		    .style('color', d => d.color)
-		    .html(d => d.key + ': ' );
+		    // .html( function(d, i) { return categories[i] + ': ' + console.log(d3.sum(data, d=> d.categories)) })
+		    // .text(d => console.log(catVals));
 		    // .html(d => d.categories + ': ' + d.history.find(h => h.categories == categories).population);
 		}
+// add secondary labels
+  svg.append("text")
+      // .attr("text-anchor", "end")
+      .attr("x", -350)
+      .attr("y", 50)
+      .attr("dy", .1)
+      .text("Archives")
+      .call(wrap1, 150); //adjust this so that the group labels are below your labels
 
+// add secondary labels
+  svg.append("text")
+      // .attr("text-anchor", "end")
+      .attr("x", -350)
+      .attr("y", 70)
+      .attr("dy", .1)
+      .text("Represent referential resources around cultural topics and collections within the Smithsonian. ")
+      .call(wrap1, 150); //adjust this so that the group labels are below your labels
+
+// gLabels.selectAll(".group-labels")
+//     .enter()
+//     .text("archives")
+//     .attr("class", "group-label")
+//     .attr("x", 0)
+//     .attr("y", 0)
+//     .attr("text-anchor", "middle")
+//     .attr("dominant-baseline", "hanging")
+
+
+
+ //Add annotations
+var parseTime = d3.timeParse("%d-%b-%y");
+var _x = d3.scaleTime().range([0, width]);
+var _y = d3.scaleLinear().range([height, 0]);
+
+
+  var labels = [{
+    data: { date: "18-Sep-09", close: 185.02 },
+    dy: 37,
+    dx: 42
+  }].map(function (l) {
+  	l.x = 770,
+  	l.y = 540,
+    l.note = Object.assign({}, l.note, { label: "Modern art is missing from the current Open Access population",
+      });
+    l.subject = { radius: 90 };
+
+    return l;
+  });
+
+  var timeFormat = d3.timeFormat("%d-%b-%y");
+
+  window.makeAnnotations = d3.annotation()
+  .annotations(labels)
+  .type(d3.annotationCalloutCircle)
+  .on('subjectover', function (annotation) {
+    annotation.type.a.selectAll("g.annotation-connector, g.annotation-note").classed("hidden", false);
+  }).on('subjectout', function (annotation) {
+    annotation.type.a.selectAll("g.annotation-connector, g.annotation-note").classed("hidden", true);
+  });
+
+  svg.append("g").attr("class", "annotation-test").call(makeAnnotations);
+
+  svg.selectAll("g.annotation-connector, g.annotation-note").classed("hidden", true);
+ 
 
 })
 
@@ -293,40 +414,98 @@ function kernelEpanechnikov(k) {
   };
 }
 
-  function wrap(text, width) {
-    text.each(function () {
-        var text = d3.select(this),
-            words = text.text().split(/\s+/).reverse(),
-            word,
-            line = [],
-            lineNumber = 1,
-            lineHeight = 10,
-            addl_space = 5, // ems
-            x = text.attr("x"),
-            y = text.attr("y"),
-            tspan = text.text(null)
-                        .append("tspan")
-                        .attr("x", x)
-                        .attr("y", y);
-        while (word = words.pop()) {
-            line.push(word);
-            tspan.text(line.join(" "));
-            if (tspan.node().getComputedTextLength() > width) {
-                line.pop();
-                tspan.text(line.join(" "));
-                line = [word];
-                tspan = text.append("tspan")
-                            .attr("x", x)
-                            .attr("y", (++lineNumber * lineHeight) + addl_space)
-                            .text(word);
-            }
-        }
-    });
+//   function wrap(text, width) {
+//     text.each(function () {
+//         var text = d3.select(this),
+//             words = text.text().split(/\s+/).reverse(),
+//             word,
+//             line = [],
+//             lineNumber = 1,
+//             lineHeight = 10,
+//             addl_space = 5, // ems
+//             x = text.attr("x"),
+//             y = text.attr("y"),
+//             tspan = text.text(null)
+//                         .append("tspan")
+//                         .attr("x", x)
+//                         .attr("y", y);
+//         while (word = words.pop()) {
+//             line.push(word);
+//             tspan.text(line.join(" "));
+//             if (tspan.node().getComputedTextLength() > width) {
+//                 line.pop();
+//                 tspan.text(line.join(" "));
+//                 line = [word];
+//                 tspan = text.append("tspan")
+//                             .attr("x", (++lineNumber * lineHeight) + addl_space)
+//                             .attr("y", y)
+//                             .text(word);
+//             }
+//         }
+//     });
+// }
 
 
-
+function wrap(text, width) {
+  text.each(function() {
+    var text = d3.select(this),
+        words = text.text().split(/\s+/).reverse(),
+        word,
+        line = [],
+        lineNumber = 0,
+        lineHeight = 1, // ems
+        y = text.attr("y"),
+        x = text.attr("x"),
+        addl_space = 10, // ems
+        dy = parseFloat(text.attr("dy")),
+        tspan = text.text(null).append("tspan").attr("x", x).attr("y", y).attr("dy", dy);
+    while (word = words.pop()) {
+      line.push(word);
+      tspan.text(line.join(" "));
+      if (tspan.node().getComputedTextLength() > width) {
+        line.pop();
+        tspan.text(line.join(" "));
+        line = [word];
+        tspan = text.append("tspan")
+        .attr("x", x)
+        .attr("y", y)
+        .attr("dy", (++lineNumber * lineHeight) + addl_space).text(word);
+        // .attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
+      }
+    }
+  });
 }
 
+function wrap1(text, width) {
+  text.each(function() {
+    var text = d3.select(this),
+        words = text.text().split(/\s+/).reverse(),
+        word,
+        line = [],
+        lineNumber = 0,
+        lineHeight = 1, // ems
+        y = text.attr("y"),
+        x = text.attr("x"),
+        // addl_space = 10, // ems
+        dy = parseFloat(text.attr("dy")),
+        tspan = text.text(null).append("tspan").attr("x", x).attr("y", y).attr("dy", dy);
+    while (word = words.pop()) {
+      line.push(word);
+      tspan.text(line.join(" "));
+      if (tspan.node().getComputedTextLength() > width) {
+        line.pop();
+        tspan.text(line.join(" "));
+        line = [word];
+        tspan = text.append("tspan")
+        .attr("x", x)
+        .attr("y", y)
+        // .attr("dy", (++lineNumber * lineHeight) + addl_space).text(word);
+        .attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
+      }
+    }
+  });
+}
+    
 
 
 
