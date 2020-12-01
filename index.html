@@ -4,9 +4,11 @@
 <!-- Load d3.js -->
 <script src="https://d3js.org/d3.v4.js"></script>
 <div id='tooltip' style='position:absolute;background-color:lightgray;padding:5px'></div>
-
+<h1>Smithsonian Open Access Decades</h1>
 <!-- Create a div where the graph will take place -->
 <div id="my_dataviz"></div>
+
+<p>analyzing open access by years</p>
 
 <!-- Style -->
 <style>
@@ -67,6 +69,22 @@ path.line {
 
     text.title {
       font-size: 1.1em;
+    }
+
+    .archiveTitle{
+    	font-size: 2em;
+    	fill: rgb(58, 137, 194);
+    	display: inline;
+    }
+
+    .hcTitle{
+	font-size: 2em;
+	fill: rgb(59, 162, 87);
+    }
+
+    .artTitle{
+	font-size: 2em;
+	fill: rgb(123, 113, 179);
     }
 
 
@@ -332,20 +350,62 @@ var alCats = [
 // add secondary labels
   svg.append("text")
       // .attr("text-anchor", "end")
+      .attr("class", "archiveTitle")
       .attr("x", -350)
       .attr("y", 50)
       .attr("dy", .1)
       .text("Archives")
-      .call(wrap1, 150); //adjust this so that the group labels are below your labels
+      .call(wrap1, 160); //adjust this so that the group labels are below your labels
 
 // add secondary labels
   svg.append("text")
       // .attr("text-anchor", "end")
+      .attr("class", "archiveText")
       .attr("x", -350)
       .attr("y", 70)
       .attr("dy", .1)
       .text("Represent referential resources around cultural topics and collections within the Smithsonian. ")
-      .call(wrap1, 150); //adjust this so that the group labels are below your labels
+      .call(wrap1, 160); //adjust this so that the group labels are below your labels
+
+ // add secondary labels
+  svg.append("text")
+      // .attr("text-anchor", "end")
+      .attr("class", "hcTitle")
+      .attr("x", -350)
+      .attr("y", 300)
+      .attr("dy", .1)
+      .text("History and Culture")
+      .call(wrap1, 160); //adjust this so that the group labels are below your labels
+
+// add secondary labels
+  svg.append("text")
+      // .attr("text-anchor", "end")
+      .attr("class", "cultureText")
+      .attr("x", -350)
+      .attr("y", 360)
+      .attr("dy", .1)
+      .text("The Smithsonian's museums of history and culture. ")
+      .call(wrap1, 160); //adjust this so that the group labels are below your labels
+
+       // add secondary labels
+  svg.append("text")
+      // .attr("text-anchor", "end")
+      .attr("class", "artTitle")
+      .attr("x", -350)
+      .attr("y", 540)
+      .attr("dy", .1)
+      .text("Art")
+      .call(wrap1, 160); //adjust this so that the group labels are below your labels
+
+// add secondary labels
+  svg.append("text")
+      // .attr("text-anchor", "end")
+      .attr("class", "artText")
+      .attr("x", -350)
+      .attr("y", 560)
+      .attr("dy", .1)
+      .text("Art and design museums.")
+      .call(wrap1, 160); //adjust this so that the group labels are below your labels
 
 // gLabels.selectAll(".group-labels")
 //     .enter()
@@ -358,31 +418,79 @@ var alCats = [
 
 
 
- //Add annotations
+
 var parseTime = d3.timeParse("%d-%b-%y");
 var _x = d3.scaleTime().range([0, width]);
 var _y = d3.scaleLinear().range([height, 0]);
 
+ //Add annotations
+ // modified from: https://bl.ocks.org/susielu/63269cf8ec84497920f2b7ef1ac85039
+//working for 1
+  // var labels = [{
+  //   data: { date: "18-Sep-09", close: 185.02 },
+  //   dy: 37,
+  //   dx: 42
+  // }].map(function (l) {
+  // 	l.x = 770,
+  // 	l.y = 540,
+  //   l.note = Object.assign({}, l.note, { label: "Modern art is missing from the current Open Access population",
+  //     });
+  //   l.subject = { radius: 90 };
+
+  //   return l;
+  // });
+
+  // window.makeAnnotations = d3.annotation()
+  // .annotations(labels)
+  // .type(d3.annotationCalloutCircle)
+  // .on('subjectover', function (annotation) {
+  //   annotation.type.a.selectAll("g.annotation-connector, g.annotation-note").classed("hidden", false);
+  // }).on('subjectout', function (annotation) {
+  //   annotation.type.a.selectAll("g.annotation-connector, g.annotation-note").classed("hidden", true);
+  // });
+
+  // svg.append("g").attr("class", "annotation-test").call(makeAnnotations);
+
+  // svg.selectAll("g.annotation-connector, g.annotation-note").classed("hidden", true);
+
 
   var labels = [{
-    data: { date: "18-Sep-09", close: 185.02 },
-    dy: 37,
-    dx: 42
-  }].map(function (l) {
-  	l.x = 770,
-  	l.y = 540,
-    l.note = Object.assign({}, l.note, { label: "Modern art is missing from the current Open Access population",
+  	note: {label: "Modern art is missing from the current Open Access population due to restrictions around certain collections"},
+  	subject: {
+  		radius: 90
+  	},
+  	x: 660,
+  	y: 540,
+  	dy: 1,
+  	dx: 1
+  },
+  {
+  	note: {label: "Peaks like this typically represent a large set of similar items obtained by a museum such as a collection of photographs from a single photographer."},
+  	subject: {
+  		radius: 20
+  	},
+  	x: 482,
+  	y: 130
+  }
+  ].map(function (l) {
+    l.note = Object.assign({}, l.note, { label: `${l.note.label}`,
       });
-    l.subject = { radius: 90 };
+    l.subject = { radius: `${l.subject.radius}` },
+    l.x = `${l.x}`,
+    l.y = `${l.y}`;
 
     return l;
   });
 
-  var timeFormat = d3.timeFormat("%d-%b-%y");
+  // var timeFormat = d3.timeFormat("%d-%b-%y");
 
   window.makeAnnotations = d3.annotation()
   .annotations(labels)
   .type(d3.annotationCalloutCircle)
+  // .accessors({
+  // 	x: function(d){return x(d.xVal)},
+  // 	y: function(d){return y(d.yVal)}
+  // })
   .on('subjectover', function (annotation) {
     annotation.type.a.selectAll("g.annotation-connector, g.annotation-note").classed("hidden", false);
   }).on('subjectout', function (annotation) {
