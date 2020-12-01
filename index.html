@@ -43,9 +43,10 @@ path.line {
     }
 
     .annotation path.connector-arrow, 
-    .title text, .annotation text,
+    .title text, .label text, .annotation text,
     .annotation.callout.circle .annotation-subject path{
       fill: black;
+      font-size: .8em;
     }
     .annotation-note-bg {
       fill: rgba(255, 255, 255, 0);
@@ -67,7 +68,7 @@ path.line {
       font-size: .7em;
     }
 
-    text.title {
+    text.label {
       font-size: 1.1em;
     }
 
@@ -465,12 +466,24 @@ var _y = d3.scaleLinear().range([height, 0]);
   	dx: 1
   },
   {
-  	note: {label: "Peaks like this typically represent a large set of similar items obtained by a museum such as a collection of photographs from a single photographer."},
+  	note: {label: "Peaks typically represent a large collection of corresponding items obtained by a museum such as a collection of photographs from a single photographer. This specific peak is related to a collection of records from government commissioned ethnographic studies of North American Indians."},
   	subject: {
   		radius: 20
   	},
   	x: 482,
-  	y: 130
+  	y: 130,
+  	dy: 2,
+  	dx: -2
+  },
+  {
+  	note: {label: "The NMAH has by far the most items with dates tagged in the open access collection"},
+  	subject: {
+  		radius: 24
+  	},
+  	x: 795,
+  	y: 365,
+  	dy: -1,
+  	dx: -1
   }
   ].map(function (l) {
     l.note = Object.assign({}, l.note, { label: `${l.note.label}`,
